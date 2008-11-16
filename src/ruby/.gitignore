@@ -1,0 +1,10 @@
+*.diff
+*.lot
+*.o
+*.so
+*.strace
+*.tmp
+LibicalWrap.c
+Makefile
+ical.h
+icalss.h
