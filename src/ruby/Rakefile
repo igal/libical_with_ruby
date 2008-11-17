@@ -1,0 +1,40 @@
+desc 'Compile Ruby bindings'
+task :default => 'LibicalWrap.so'
+
+file 'ical.h' do
+  cp '../libical/ical.h', 'ical.h'
+end
+
+file 'icalss.h' do
+  cp '../libicalss/icalss.h', 'icalss.h'
+end
+
+file 'LibicalWrap.c' => ['LibicalWrap.i', '../libical/.libs/libical.so'] do
+  Rake::Task['clean'].invoke
+  sh 'swig -ruby -autorename -o LibicalWrap.c LibicalWrap.i'
+end
+
+file 'Makefile' => ['LibicalWrap.c', 'extconf.rb'] do
+  sh 'ruby extconf.rb'
+end
+
+file 'LibicalWrap.so' => ['LibicalWrap.c', 'Makefile', 'ical.h', 'icalss.h'] do
+  sh 'make'
+end
+
+desc 'Clean up generated files.'
+task 'clean' do
+  files = Dir['*.o', '*.so', '*.loT', 'Makefile', 'LibicalWrap.c'].uniq
+  rm files unless files.empty?
+end
+
+desc 'Start console session with bindings loaded.'
+task 'console' => ['LibicalWrap.so'] do
+  require 'LibicalWrap'
+  require 'rubygems'; require 'ruby-debug'; Debugger.start; debugger; 1
+end
+
+desc 'Run simple check to see if bindings worked.'
+task 'run' => ['LibicalWrap.so'] do
+  sh %{ruby -e 'puts "REQUIRING"; require "LibicalWrap"; puts "CALLING"; p LibicalWrap::icalcomponent_kind_to_string(9)'}
+end
