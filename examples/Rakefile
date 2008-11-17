@@ -1,0 +1,16 @@
+task :default => :run
+
+file '.libs/parse_text_main' => ['parse_text_main.c', '../src/libical/.libs/libical.so'] do
+  sh %{gcc -DHAVE_CONFIG_H -I. -I. -I.. -I. -I../src  -I../src/libical -I./../src/libical -I../src/libicalss -I../src/libicalvcal     -g -O2 -fPIC -MT parse_text_main.o -MD -MP -MF ".deps/parse_text_main.Tpo" -c -o parse_text_main.o parse_text_main.c}
+  sh %{gcc -g -O2 -fPIC -o .libs/parse_text_main parse_text_main.o ../src/libical/.libs/libical.so ../src/libicalss/.libs/libicalss.so ../src/libicalvcal/.libs/libicalvcal.so -lpthread}
+end
+
+task :run => '.libs/parse_text_main' do
+  ENV['LD_LIBRARY_PATH'] = '../src/libical/.libs:../src/libicalss/.libs:../src/libicalvcal/.libs'
+  sh ".libs/parse_text_main ../test-data/2445.ics"
+end
+
+task :clean do
+  files = Dir['.libs/*', '*.o'].uniq
+  rm files unless files.empty?
+end
