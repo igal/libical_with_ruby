@@ -1,6 +1,4 @@
-/* parse_text.c
-   
- */
+/* parse_text_main.c -- Demonstrates line-by-line parsing of a iCalendar document */
 #include <stdio.h>
 #include <errno.h>
 #include <stdio.h>
@@ -28,9 +26,9 @@ char* read_stream(char *s, size_t size, void *d)
 void parse_text(int argc, char* argv[])
 {
 
-    char* line; 
+    char* line;
     FILE* stream;
-    icalcomponent *c; 
+    icalcomponent *c;
 
     /* Create a new parser object */
     icalparser *parser = icalparser_new();
@@ -43,7 +41,7 @@ void parse_text(int argc, char* argv[])
     icalparser_set_gen_data(parser,stream);
 
     do{
-    
+
 	/* Get a single content line by making one or more calls to
            read_stream()*/
 	line = icalparser_get_line(parser,read_stream);
