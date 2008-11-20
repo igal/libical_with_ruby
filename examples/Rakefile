@@ -1,14 +1,17 @@
 # Compile all C-code programs in the NAMES array to the .libs directory.
 NAMES = %w[
   parse_text_main
+  parse_string_main
 ]
 OBJS = NAMES.map{|name| ".libs/#{name}"}
 
 NAMES.each do |name|
   file ".libs/#{name}" => ["#{name}.c", '../src/libical/.libs/libical.so'] do
     puts "adding"
-    sh %{gcc -DHAVE_CONFIG_H -I. -I. -I.. -I. -I../src  -I../src/libical -I./../src/libical -I../src/libicalss -I../src/libicalvcal     -g -O2 -fPIC -MT #{name}.o -MD -MP -MF ".deps/#{name}.Tpo" -c -o #{name}.o #{name}.c}
-    sh %{gcc -g -O2 -fPIC -o .libs/#{name} #{name}.o ../src/libical/.libs/libical.so ../src/libicalss/.libs/libicalss.so ../src/libicalvcal/.libs/libicalvcal.so -lpthread}
+    sh %{gcc -DHAVE_CONFIG_H -I. -I. -I.. -I. -I../src  -I../src/libical -I./../src/libical -I../src/libicalss -I../src/libicalvcal     -g -O2 -fPIC -MT #{name}.o -MD -MP -MF ".deps/#{name}.Tpo" -c -o #{name}.o #{name}.c} \
+    	or raise "!! Compile failed"  
+    sh %{gcc -g -O2 -fPIC -o .libs/#{name} #{name}.o ../src/libical/.libs/libical.so ../src/libicalss/.libs/libicalss.so ../src/libicalvcal/.libs/libicalvcal.so -lpthread} \
+    	or raise "!! Link failed"
   end
 end
 
@@ -17,6 +20,7 @@ task :default => OBJS
 # Runs the compiled program from the .libs directory.
 def runner(name, *args)
   Rake::Task[".libs/#{name}"].invoke
+  puts "LD_LIBRARY_PATH=../src/libical/.libs:../src/libicalss/.libs:../src/libicalvcal/.libs .libs/#{name} #{args.join(' ')}"
   ENV['LD_LIBRARY_PATH'] = '../src/libical/.libs:../src/libicalss/.libs:../src/libicalvcal/.libs'
   sh ".libs/#{name} #{args.join(' ')}"
 end
@@ -27,6 +31,10 @@ task :default => :run
 # Specific runners
 task :parse_text_main do
   runner :parse_text_main, '../test-data/2445.ics'
+end
+
+task :parse_string_main do
+  runner :parse_string_main, '../test-data/2445.ics'
 end
 
 task :clean do
