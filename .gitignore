@@ -2,13 +2,16 @@
 *.la
 *.lo
 *.loT
+*.mk
 *.o
 *.so
 *.tmp
 *~
 .*.swp
 .cproject
+.dep.inc
 .project
+.settings
 /Makefile
 /config.h
 /config.log
@@ -50,3 +53,5 @@
 /test-data/Makefile
 /zoneinfo/Makefile
 TAGS
+nbproject
+tags
