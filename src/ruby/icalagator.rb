@@ -153,7 +153,7 @@ class Icalagator
     #
     #   event.values_for(:categories) # => ["CODE SPRINT", "CALAGATOR", "RUBY", "FUN"]
     def values_for(key)
-      return self.properties(key)
+      return self.properties(key).map{|t| t.value}
     end
 
     # Return array of property keys for this component.
