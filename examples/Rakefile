@@ -25,8 +25,9 @@ def runner(name, *args)
   sh ".libs/#{name} #{args.join(' ')}"
 end
 
-task :run => :parse_text_main
-task :default => :run
+task :example => :parse_string_main
+task :run => :example
+task :default => :example
 
 # Specific runners
 task :parse_text_main do
