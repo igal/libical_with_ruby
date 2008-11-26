@@ -59,7 +59,8 @@ int main(int argc, char* argv[])
 
 		icalproperty* dtstart_property = icalcomponent_get_first_property(component, ICAL_DTSTART_PROPERTY);
 		const icaltimetype dtstart = icalproperty_get_dtstart(dtstart_property);
-		printf("- dtstart: %i-%i-%iT%i:%i:%i\n", dtstart.year, dtstart.month, dtstart.day, dtstart.hour, dtstart.minute, dtstart.second);
+		printf("- dtstart: %0.4d-%0.2d-%0.2d %0.2d:%0.2d:%0.2d\n", dtstart.year, dtstart.month, dtstart.day, dtstart.hour, dtstart.minute, dtstart.second);
+        printf("\n");
 
 		free(uid);
 		icalproperty_free(uid_property);
