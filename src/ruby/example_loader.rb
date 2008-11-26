@@ -19,6 +19,5 @@ HERE
 
 ics = File.read('../../test-data/2445.ics')
 
-# FIXME Make parser return a calender, not a void
 calendar = LibicalWrap.icalparser_parse_string(ics)
-puts "Parsed ics data and got: #{calendar.inspect}"
+puts "* Parsed ics data and got: #{calendar.inspect}"

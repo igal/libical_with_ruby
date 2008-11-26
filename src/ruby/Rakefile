@@ -23,18 +23,39 @@ file 'LibicalWrap.so' => ['LibicalWrap.c', 'Makefile', 'ical.h', 'icalss.h'] do
 end
 
 desc 'Clean up generated files.'
-task 'clean' do
+task :clean do
   files = Dir['*.o', '*.so', '*.loT', 'Makefile', 'LibicalWrap.c'].uniq
   rm files unless files.empty?
 end
 
-desc 'Start console session with bindings loaded.'
-task 'console' => ['LibicalWrap.so'] do
+desc 'Start console session with bindings loaded. Requires "ruby-debug" gem.'
+task :console => ['LibicalWrap.so'] do
   require 'LibicalWrap'
   require 'rubygems'; require 'ruby-debug'; Debugger.start; debugger; 1
 end
 
-desc 'Run simple check to see if bindings worked.'
-task 'run' => ['LibicalWrap.so'] do
-  sh %{ruby -e 'puts "REQUIRING"; require "LibicalWrap"; puts "CALLING"; p LibicalWrap::icalcomponent_kind_to_string(9)'}
+desc 'Run simple check to see if bindings work.'
+task :check => ['LibicalWrap.so'] do
+  puts 'Requiring LibicalWrap...'
+  require 'LibicalWrap'
+  puts 'SUCCESS!'
+  puts 'Calling LibicalWrap function...'
+  puts LibicalWrap::icalcomponent_kind_to_string(9).size > 0 ? 'SUCCESS!' : 'FAILURE!'
+end
+task :run => :check
+
+desc "Run an example program that uses the Ruby bindings"
+task :example => ['LibicalWrap.so'] do
+  sh %{ruby example_minimal.rb}
+end
+
+desc "Run the Ruby example programs and stop if one fails"
+task :test => ['LibicalWrap.so'] do
+  [
+    "example_loader.rb", 
+    "example_minimal.rb", 
+    "example_reader.rb", 
+  ].each do |program|
+    sh "ruby #{program}" or raise "Failed while running: #{program}"
+  end
 end
