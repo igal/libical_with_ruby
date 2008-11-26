@@ -1,54 +1,119 @@
 NOTES ON RUBY BINDINGS
 ======================
 
-Igal Koshevoy / Calagator.org / 2008-11-19
+Igal Koshevoy / Calagator.org / 2008-11-26
 
-RATIONALE FOR CONSIDERING LIBICAL
 
-The libical is a popular iCalendar library used by Mozilla, Gnome, KDE and
-other products. It could provide us with recurring events, more power, greater
-stability and better long-term investment than the VPIM parser.
+SECTIONS
+- SUMMARY
+- WHY LIBICAL
+- ISSUES WITH LIBICAL
+- FILES AND DIRECTORIES
+- GETTING STARTED
 
-If libical can be improved, it'll help many others using it. This code could
-also provide the basis for Python, PHP and Java libraries too.
+
+SUMMARY
+
+These notes describe initial work being done on providing Ruby bindings for
+libical. Work on these can be found in the `src/ruby` directory. The
+`icalagator.rb` file provides a high-level Ruby wrapper for libical. The
+various `example_*.rb` files provide runnable example programs demonstrating
+how to use the bindings and wrapper.
+
+
+TASKS
+
+- Write C example for extracting unknown properties. E.g., libical doesn't seem
+  to be able to extract the POSTALCODE property from a VVENUE because it's not
+  within the iCalendar specification. Resolving this may be tricky because
+  according to `icalparser_add_line`, when an unknown property is found, its
+  payload is discarded and an error property is added instead containing the
+  string "Parse error in property name". A fix may require adding a field to
+  `icalproperty` for storing the original payload and property name (e.g.,
+  "POSTALCODE" and "97201"), and accessors to get these.
+- Write Ruby wrapper for extracting unknown properties.
+
+- Write C example for extracting recurring events.
+- Write Ruby wrapper for extracting recurring events.
+
+- Write C example for extracting times and converting them to UTC. The
+  low-level routines provide a way to extract time and timezone, but it's
+  unclear how to combine these.
+- Write Ruby wrapper for hiding conversion of times to UTC.
+
+
+WHY LIBICAL
+
+libical is a iCalendar library used by Mozilla, KDE, Gnome and others. It
+provides more features than any open source iCalendar library available and is
+the most-widely used.
+
+Writing Ruby bindings to libical, rather than improving upon native-Ruby
+libraries like VPIM, may be a good way to gain access to many features and a
+higher-quality code base, and provide a better long-term investment.
+
+Much of this work will also be reusable, making it much easier to write
+bindings and wrappers for languages like Python, PHP, Java and Perl.
+
 
 ISSUES WITH LIBICAL
 
-libical has much baggage. It's a big, confusing C code base. It has very little
-documentation and provides no working examples. The Python and Perl bindings
-that libical ships with either never worked or have been broken for years.
-People tried creating Ruby bindings years ago, but failed. Building binary Ruby
-bindings for Windows will be a phenomenal pain.
+libical is a large, complex C library. Most of libical's complexity is the
+direct result of the iCalendar specification being large and inconsistent.
 
-PROGRESS WITH RUBY BINDINGS FOR LIBICAL
+Using the libical bindings directly from Ruby is painful because it requires a
+thorough understanding of C, iCalendar, and libical implementation.
 
-I wrote Ruby bindings for this by reworking the broken Python bindings and
-adding lots of elbow grease in the form of build scripts. I can use trivial
-functions within it just fine from Ruby, but am baffled by the libical API.
-Unless I can do trivial operations like getting events from a data stream,
-there's not much sense in working further on th Ruby bindings. There's a couple
-extra .rb files in "src/ruby" that came from the last abandoned Ruby bindings
-for libical project, which don't work but may prove useful as guidance.
+Writing an easy-to-use Ruby wrapper for libical is vital, but difficult because
+of the impedance mismatch between C and Ruby. The libical C code is
+self-contained, data-oriented, and strongly-typed. The Ruby wrapper needs to be
+idiomatic, object-oriented, and duck-typed.
 
-GETTING STARTED WITH LIBICAL FOR C AND RUBY DEVELOPERS
+The libical source ships with for Python and Perl, but these either never
+worked or have ceased working long ago.
+
+Compiling the bindings for Microsoft Windows will be a phenomenal pain.
+
+
+FILES AND DIRECTORIES
+
+- doc/UsingLibical.txt : Provides limited documentation for C API.
+
+- examples/parse_string_main.c : Provides runnable C example that parses a
+  string and prints its contents. You can run it by executing:
+
+    make && (cd examples && rake -v parse_string_main)
+
+- examples/Rakefile : Provides wrapper for compiling and running C examples.
+
+- src/ruby/LibicalWrap.i : Provides instructions for SWIG on how to expose C
+  functions and structs to other languages.
+
+- src/ruby/LibicalWrap.so : Provides low-level Ruby bindings. To
+  use this, you just `require` the file from Ruby.
+
+- src/ruby/icalagator.rb : Provides high-level Ruby wrapper that makes it
+  easier to use libical.
+
+- src/ruby/Rakefile : Provides wrapper for compiling bindings.
+
+
+GETTING STARTED
 
 - Download code from: http://github.com/igal/libical_with_ruby/tree/master
 
 - Or clone code from: git@github.com:igal/libical_with_ruby.git
 
-- Read "doc/UsingLibical.txt", although it's either wrong, obsolete or too
-  confusing to explain how to perform the most trivial operations
+- Compile the C code:
 
-- Perform high-level compile of libical's C code:
     ./configure && make
 
-- Review "examples/parse_string_main.c", my trivial example that reads a file
-  into a large string, parses it, and then extracts events and properties
-  (e.g., summary of the event). To compile and run the C example:
+- Run the "examples/parse_string_main.c", an example program that parses a
+  string of iCalendar data and prints out the extracted fields:
 
-    make && (cd examples && rake -v parse_string_main)
+    make && (cd examples && rake example)
 
-- To compile the Ruby bindings, which demonstrate how to run a trivial libical
-  function, review "src/ruby/Rakefile" and run:
+- Run the "src/ruby/example_reader.rb", an example program that parses a string
+  of iCalendar data and prints out the extracted fields:
 
-    make && (cd src/ruby && rake -v run)
+    make && (cd src/ruby && rake example)
