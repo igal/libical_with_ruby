@@ -55,6 +55,7 @@ task :test => ['LibicalWrap.so'] do
     "example_loader.rb", 
     "example_minimal.rb", 
     "example_reader.rb", 
+    "example_upcoming.rb", 
   ].each do |program|
     sh "ruby #{program}" or raise "Failed while running: #{program}"
   end
